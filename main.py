@@ -1,6 +1,7 @@
 import random
 
 def mainMenu():
+    # prints main menu and gets user's input
     print("Welcome, mayor of Ngee Ann City!")
     print("----------------------------")
     print("1. Start new game")
@@ -13,9 +14,11 @@ def mainMenu():
     return choice
 
 def initGrid(rows, cols):
+    # initialize grid dictionary and coins
     grid = {}
     coins = 16
 
+    # adds grid elements into grid dictionary with alphanumeric keys
     for i in range(rows):
         for j in range(cols):
             grid[(chr(65+j), i+1)] = " "
@@ -23,25 +26,29 @@ def initGrid(rows, cols):
     return grid, coins
 
 def displayTurn(turns, rows, cols, grid):
+    # checks if game is over
     if turns <= rows * cols:
         print("Turn", turns)
         turns += 1
     else:
         print("Final layout of Ngee Ann City:")
 
+    # print game grid
     print("  ", end = "")
     for c in range(cols):
         print("{:>4}".format(chr(65+c)), end = "")   
     print()
 
+    #print all rows including grid lines
     for row in range(rows*2+1):
+        # if even, print grid lines
         if row % 2 == 0:
             print("   ", end = "")
 
             for col in range(cols):
                 print("+---", end = "")
             print("{:<10}".format("+"), end = "")
-        else:
+        else: # if odd, print grid elements
             if row >= 19:
                 print(" {}".format(row // 2 + 1), end = "")
             else:
@@ -62,8 +69,13 @@ def displayGameMenu(randBuild1, randBuild2):
 
 def getRandomBuildChoice(buildDict):
 
+    # gets random building from building dictionary
     randBuild1 = random.choice(list(buildDict.items()))
     randBuild2 = random.choice(list(buildDict.items()))
+
+    # ensure each building option is different
+    while randBuild2 == randBuild1:
+        randBuild2 = random.choice(list(buildDict.items()))
 
     return randBuild1, randBuild2
 
@@ -79,6 +91,7 @@ while True:
     if choice == "0":
         print("Game Closed.")
         break
+    # start new game
     elif choice == "1":
         grid, coins = initGrid(ROWS, COLS)
 
@@ -87,8 +100,9 @@ while True:
         randBuild1, randBuild2 = getRandomBuildChoice(buildings)
         displayGameMenu(randBuild1, randBuild2)
         option = input()
+        # return to main menu
         if option == "0":
-            break
+            continue
     else:
         print("Invalid Option")
         
