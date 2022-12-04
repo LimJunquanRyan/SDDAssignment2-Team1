@@ -22,18 +22,20 @@ def initGrid(rows, cols):
     # adds grid elements into grid dictionary with alphanumeric keys
     for i in range(rows):
         for j in range(cols):
-            grid[(chr(65+j), i+1)] = " "
+            grid[(chr(65+j), str(i+1))] = " "
     
     return grid, coins
 
-def displayTurn(turns, rows, cols, grid):
+def displayTurn(turns, coins, rows, cols, grid):
+    print()
     # checks if game is over
-    if turns <= rows * cols:
+    if turns <= rows * cols and coins > 0:
         print("Turn", turns)
-        turns += 1
+        print("Coins", coins)
     else:
         print("Final layout of Ngee Ann City:")
 
+    print()
     # print game grid
     print("  ", end = "")
     for c in range(cols):
@@ -55,7 +57,7 @@ def displayTurn(turns, rows, cols, grid):
             else:
                 print(" {} ".format(row // 2 + 1), end = "")
             for col in range(cols):
-                print("| {} ".format(grid[(chr(65+col),row // 2 + 1)]), end = "")
+                print("| {} ".format(grid[(chr(65+col),str(row // 2 + 1))]), end = "")
             print("{:<10}".format("|"), end = "")
         print()
 
@@ -79,6 +81,25 @@ def getRandomBuildChoice(buildDict):
         randBuild2 = random.choice(list(buildDict.items()))
 
     return randBuild1, randBuild2
+
+def addBuildingToGrid(build, grid, coins):
+
+    buildOption = input("Build where? ").upper()
+    location = (buildOption[:1], buildOption[1:])
+    print(location)
+
+    if location not in grid:
+        print("Location is invalid or not on the grid.")
+        return addBuildingToGrid(build, grid, coins)
+    else:
+        if grid[location] != " ":
+            print("Location already has a building on it.")
+            return addBuildingToGrid(build, grid, coins)
+        else:
+            grid[location] = build[1]
+            coins -= 1
+            return coins
+
 
 def saveGame():
     file = open("saveFile.txt", "w")
@@ -123,16 +144,31 @@ while True:
     elif choice == "1":
         grid, coins = initGrid(ROWS, COLS)
 
-        displayTurn(turns, ROWS, COLS, grid)
+        while True:
+            displayTurn(turns, coins, ROWS, COLS, grid)
 
-        randBuild1, randBuild2 = getRandomBuildChoice(buildings)
-        displayGameMenu(randBuild1, randBuild2)
-        option = input()
-        # return to main menu
-        if option == "0":
-            continue
-        if option == "4":
-            saveGame()
+            if turns <= ROWS * COLS and coins > 0:
+                randBuild1, randBuild2 = getRandomBuildChoice(buildings)
+                displayGameMenu(randBuild1, randBuild2)
+                option = input()
+                # return to main menu
+                if option == "0":
+                    break
+                elif option == "1":
+                    coins = addBuildingToGrid(randBuild1, grid, coins)
+                elif option == "2":
+                    coins = addBuildingToGrid(randBuild2, grid, coins)
+                elif option == "4":
+                    saveGame()
+                else:
+                    continue
+            else:
+                print()
+                print("Thank you for playing!")
+                print()
+                break
+            
+            turns += 1
     else:
         print("Invalid Option")
         
