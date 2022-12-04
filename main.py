@@ -87,19 +87,38 @@ def addBuildingToGrid(build, grid, coins):
     buildOption = input("Build where? ").upper()
     location = (buildOption[:1], buildOption[1:])
     print(location)
-
-    if location not in grid:
-        print("Location is invalid or not on the grid.")
-        return addBuildingToGrid(build, grid, coins)
-    else:
-        if grid[location] != " ":
-            print("Location already has a building on it.")
+    if turns == 1:
+        if location not in grid:
+            print("Location is invalid or not on the grid.")
             return addBuildingToGrid(build, grid, coins)
         else:
-            grid[location] = build[1]
-            coins -= 1
-            return coins
+            if grid[location] != " ":
+                print("Location already has a building on it.")
+                return addBuildingToGrid(build, grid, coins)
+            else:
+                grid[location] = build[1]
+                coins -= 1
+                return coins
+    else:
+        if location not in grid or not checkAdjacency(location):
+            print("Location is invalid or not on the grid.")
+            return addBuildingToGrid(build, grid, coins)
+        else:
+            if grid[location] != " ":
+                print("Location already has a building on it.")
+                return addBuildingToGrid(build, grid, coins)
+            else:
+                grid[location] = build[1]
+                coins -= 1
+                return coins
 
+
+def checkAdjacency(location):
+    if grid[int(location[1]) + 1][ord(location[0]) - 64] not in buildings and grid[int(location[1]) - 1][ord(location[0]) - 64] not in buildings and \
+       grid[int(location[1])][ord(location[0]) - 63] not in buildings and grid[int(location[1])][ord(location[0]) - 65] not in buildings:
+        return False
+    else:
+        return True
 
 def saveGame():
     file = open("saveFile.txt", "w")
