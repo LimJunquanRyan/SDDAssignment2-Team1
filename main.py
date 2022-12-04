@@ -13,6 +13,7 @@ def mainMenu():
     print()
     return choice
 
+
 def initGrid(rows, cols):
     # initialize grid dictionary and coins
     grid = {}
@@ -79,6 +80,33 @@ def getRandomBuildChoice(buildDict):
 
     return randBuild1, randBuild2
 
+def saveGame():
+    file = open("saveFile.txt", "w")
+    file.write(str(turns) + "\n")
+    file.write(str(coins) + "\n")
+    file.write(randBuild1 + "," + randBuild2 + "\n")
+
+    for rows in range(ROWS + 2):
+        rowSave = ""
+        for column in range(COLS  + 2):
+            rowSave = rowSave #not done yet due to building not implemented yet
+        file.write(rowSave + "\n")
+
+    file.close()
+    print("Game saved!")
+
+def loadGame():
+    global turns, coins, randBuild1, randBuild2
+    file = open("saveFile.txt", "r")
+    turns = int(file.readline())
+    coins = int(file.readline())
+    randBuild = file.readline()
+    randBuild = randBuild.strip("\n")
+    randBuild = randBuild.split(",")
+    randBuild1 = randBuild[0]
+    randBuild2 = randBuild[1]
+    # the rest implementing when building feature is completed
+
 ROWS = 20
 COLS = 20
 turns = 1
@@ -103,6 +131,8 @@ while True:
         # return to main menu
         if option == "0":
             continue
+        if option == "4":
+            saveGame()
     else:
         print("Invalid Option")
         
