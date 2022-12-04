@@ -111,56 +111,25 @@ def addBuildingToGrid(build, grid, coins):
                 grid[location] = build[1]
                 coins -= 1
                 return coins
-
-
-# def checkAdjacency(location):
-#     if location[0] == "A":
-#         if location[1] == "1":
-#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         elif location[1] == "20":
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         else:
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings and \
-#                 grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
-#                 return False
-#             else:
-#                 return True
-#     elif location[0] == "T":
-#         if location[1] == "1":
-#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         elif location[1] == "20":
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         else:
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
-#                 grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
-#                 return False
-#             else:
-#                 return True
-#     elif location[0] != "T":
-#         if location[1] == "1":
-#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
-#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         elif location[1] == "20":
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
-#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
-#                 return False
-#         else:
-#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
-#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings and grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
-#                 return False
-#             else:
-#                 return True
-#     else:
-#         return True
-
+    
 def checkAdjacency(location):
-    if grid[ord(location[0]), str(int(location[1]) + 1)] not in buildings and grid[ord(location[0]), str(int(location[1]) - 1)] not in buildings and \
-       grid[ord(location[0]) - 1, str(int(location[1]))] not in buildings and grid[ord(location[0]) + 1, str(int(location[1]))] not in buildings:
+    build = ['R', 'I', 'C', 'O', '*']
+    check = ['N', 'N', 'N', 'N']
+    print(location[1])
+    print(ord(location[0]))
+    if 1 <= int(location[1]) + 1 <= 20 and 65 <= ord(location[0]) <= 84:
+        if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in build:
+            check[0] = 'Y'
+    if 1 <= int(location[1]) <= 20 and 65 <= ord(location[0]) - 1 <= 84:
+        if grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in build:
+            check[1] = 'Y'
+    if 1 <= int(location[1]) - 1 <= 20 and 65 <= ord(location[0]) <= 84:
+        if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in build:
+            check[2] = 'Y'
+    if 1 <= int(location[1]) <= 20 and 65 <= ord(location[0]) + 1 <= 84:
+        if grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in build:
+            check[3] = 'Y'
+    if check[0] == 'Y' and check[1] == 'Y' and check[2] == 'Y' and check[3] == 'Y':
         return False
     else:
         return True
@@ -169,14 +138,18 @@ def gainCoin(coins):
     for rows in range(ROWS):
         for columns in range(COLS):
             if grid[chr(65+rows), str(columns+1)] == "I" or grid[chr(65+rows), str(columns+1)] == "C":
-                if grid[chr(64+rows), str(columns+1)] == "R" and 97 <= rows+65 <= 122:
-                    coins += 1
-                if grid[chr(66+rows), str(columns+1)] == "R" and 97 <= rows+65 <= 122:
-                    coins += 1
-                if grid[chr(64+rows), str(columns+2)] == "R" and 97 <= rows+65 <= 122:
-                    coins += 1
-                if grid[chr(64+rows), str(columns)] == "R" and 97 <= rows+65 <= 122:
-                    coins += 1
+                if 1 <= columns+1 + 1 <= 20 and 65 <= 64+rows <= 84:
+                    if grid[chr(64+rows), str(columns+1)] == "R":
+                        coins += 1
+                elif 1 <= columns+1 + 1 <= 20 and 65 <= 66+rows <= 84:
+                    if grid[chr(66+rows), str(columns+1)] == "R":
+                        coins += 1
+                elif 1 <= columns+1 + 2 <= 20 and 65 <= 64+rows <= 84:
+                    if grid[chr(64+rows), str(columns+2)] == "R":
+                        coins += 1
+                elif 1 <= columns+1 <= 20 and 65 <= 64+rows <= 84:
+                    if grid[chr(64+rows), str(columns)] == "R":
+                        coins += 1
     return coins
                 
 def saveGame():
@@ -243,8 +216,10 @@ while True:
                     break
                 elif option == "1":
                     coins = addBuildingToGrid(randBuild1, grid, coins)
+                    gainCoin(coins)
                 elif option == "2":
                     coins = addBuildingToGrid(randBuild2, grid, coins)
+                    gainCoin(coins)
                 elif option == "4":
                     saveGame()
                 else:
