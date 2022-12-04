@@ -165,7 +165,7 @@ def checkAdjacency(location):
     else:
         return True
 
-def gaincoin(coins):
+def gainCoin(coins):
     for rows in range(ROWS):
         for columns in range(COLS):
             if grid[chr(65+rows), str(columns+1)] == "I" or grid[chr(65+rows), str(columns+1)] == "C":
