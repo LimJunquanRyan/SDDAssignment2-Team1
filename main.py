@@ -113,23 +113,72 @@ def addBuildingToGrid(build, grid, coins):
                 return coins
 
 
+# def checkAdjacency(location):
+#     if location[0] == "A":
+#         if location[1] == "1":
+#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         elif location[1] == "20":
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         else:
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings and \
+#                 grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
+#                 return False
+#             else:
+#                 return True
+#     elif location[0] == "T":
+#         if location[1] == "1":
+#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         elif location[1] == "20":
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         else:
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
+#                 grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
+#                 return False
+#             else:
+#                 return True
+#     elif location[0] != "T":
+#         if location[1] == "1":
+#             if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
+#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         elif location[1] == "20":
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
+#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings:
+#                 return False
+#         else:
+#             if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in buildings and grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in buildings and \
+#                 grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in buildings and grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in buildings:
+#                 return False
+#             else:
+#                 return True
+#     else:
+#         return True
+
 def checkAdjacency(location):
-    if grid[int(location[1]) + 1][ord(location[0]) - 64] not in buildings and grid[int(location[1]) - 1][ord(location[0]) - 64] not in buildings and \
-       grid[int(location[1])][ord(location[0]) - 63] not in buildings and grid[int(location[1])][ord(location[0]) - 65] not in buildings:
+    if grid[ord(location[0]), str(int(location[1]) + 1)] not in buildings and grid[ord(location[0]), str(int(location[1]) - 1)] not in buildings and \
+       grid[ord(location[0]) - 1, str(int(location[1]))] not in buildings and grid[ord(location[0]) + 1, str(int(location[1]))] not in buildings:
         return False
     else:
         return True
+
+def gaincoin():
+    print("hi")
 
 def saveGame():
     file = open("saveFile.txt", "w")
     file.write(str(turns) + "\n")
     file.write(str(coins) + "\n")
-    file.write(randBuild1 + "," + randBuild2 + "\n")
+    file.write(str(randBuild1) + "\n")
+    file.write(str(randBuild2) + "\n")
 
-    for rows in range(ROWS + 2):
+    for rows in range(ROWS):
         rowSave = ""
-        for column in range(COLS  + 2):
-            rowSave = rowSave #not done yet due to building not implemented yet
+        for column in range(COLS):
+            rowSave = rowSave + grid[chr(65+rows), str(column+1)] + ","
         file.write(rowSave + "\n")
 
     file.close()
@@ -140,12 +189,18 @@ def loadGame():
     file = open("saveFile.txt", "r")
     turns = int(file.readline())
     coins = int(file.readline())
-    randBuild = file.readline()
-    randBuild = randBuild.strip("\n")
-    randBuild = randBuild.split(",")
-    randBuild1 = randBuild[0]
-    randBuild2 = randBuild[1]
-    # the rest implementing when building feature is completed
+    randBuild1 = file.readline()
+    randBuild2 = file.readline()
+    rows = 0
+    grid = {}
+    for line in file:
+        line = line.strip("\n")
+        buildingRow = line.split(",")
+        for columns in range(20):
+            grid[chr(65+rows), str(columns+1)] = buildingRow[columns]
+        rows += 1
+    file.close()
+    return grid
 
 ROWS = 20
 COLS = 20
@@ -160,9 +215,11 @@ while True:
         print("Game Closed.")
         break
     # start new game
-    elif choice == "1":
-        grid, coins = initGrid(ROWS, COLS)
-
+    elif choice in ["1", "2"]:
+        if choice == "1":
+            grid, coins = initGrid(ROWS, COLS)
+        else:
+            grid = loadGame()
         while True:
             displayTurn(turns, coins, ROWS, COLS, grid)
 
