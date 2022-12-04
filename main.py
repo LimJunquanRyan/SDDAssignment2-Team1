@@ -165,9 +165,20 @@ def checkAdjacency(location):
     else:
         return True
 
-def gaincoin():
-    print("hi")
-
+def gaincoin(coins):
+    for rows in range(ROWS):
+        for columns in range(COLS):
+            if grid[chr(65+rows), str(columns+1)] == "I" or grid[chr(65+rows), str(columns+1)] == "C":
+                if grid[chr(64+rows), str(columns+1)] == "R" and 97 <= rows+65 <= 122:
+                    coins += 1
+                if grid[chr(66+rows), str(columns+1)] == "R" and 97 <= rows+65 <= 122:
+                    coins += 1
+                if grid[chr(64+rows), str(columns+2)] == "R" and 97 <= rows+65 <= 122:
+                    coins += 1
+                if grid[chr(64+rows), str(columns)] == "R" and 97 <= rows+65 <= 122:
+                    coins += 1
+    return coins
+                
 def saveGame():
     file = open("saveFile.txt", "w")
     file.write(str(turns) + "\n")
@@ -177,8 +188,8 @@ def saveGame():
 
     for rows in range(ROWS):
         rowSave = ""
-        for column in range(COLS):
-            rowSave = rowSave + grid[chr(65+rows), str(column+1)] + ","
+        for columns in range(COLS):
+            rowSave = rowSave + grid[chr(65+rows), str(columns+1)] + ","
         file.write(rowSave + "\n")
 
     file.close()
