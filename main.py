@@ -141,7 +141,6 @@ def gainCoin(coins):
         for columns in range(COLS):
             if grid[chr(65+rows), str(columns+1)] in build or grid[chr(65+rows), str(columns+1)] in build:
                 if 1 <= columns+1 + 1 <= 20 and 65 <= 64+rows <= 84:
-                    print(columns,rows)
                     if grid[chr(65+rows), str(columns)] in build2:
                         coins += 1
                 if 1 <= columns+1 + 1 <= 20 and 65 <= 66+rows <= 84:
