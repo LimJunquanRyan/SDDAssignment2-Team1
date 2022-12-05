@@ -135,20 +135,23 @@ def checkAdjacency(location):
         return True
 
 def gainCoin(coins):
+    build = ['I', 'C']
+    build2 = ['R']
     for rows in range(ROWS):
         for columns in range(COLS):
-            if grid[chr(65+rows), str(columns+1)] == "I" or grid[chr(65+rows), str(columns+1)] == "C":
+            if grid[chr(65+rows), str(columns+1)] in build or grid[chr(65+rows), str(columns+1)] in build:
                 if 1 <= columns+1 + 1 <= 20 and 65 <= 64+rows <= 84:
-                    if grid[chr(64+rows), str(columns+1)] == "R":
+                    print(columns,rows)
+                    if grid[chr(65+rows), str(columns)] in build2:
                         coins += 1
-                elif 1 <= columns+1 + 1 <= 20 and 65 <= 66+rows <= 84:
-                    if grid[chr(66+rows), str(columns+1)] == "R":
+                if 1 <= columns+1 + 1 <= 20 and 65 <= 66+rows <= 84:
+                    if grid[chr(65+rows), str(columns+2)] in build2:
                         coins += 1
-                elif 1 <= columns+1 + 2 <= 20 and 65 <= 64+rows <= 84:
-                    if grid[chr(64+rows), str(columns+2)] == "R":
+                if 1 <= columns+1 + 2 <= 20 and 65 <= 64+rows <= 84:
+                    if grid[chr(64+rows), str(columns+1)] in build2:
                         coins += 1
-                elif 1 <= columns+1 <= 20 and 65 <= 64+rows <= 84:
-                    if grid[chr(64+rows), str(columns)] == "R":
+                if 1 <= columns+1 <= 20 and 65 <= 64+rows <= 84:
+                    if grid[chr(66+rows), str(columns+1)] in build2:
                         coins += 1
     return coins
                 
@@ -216,10 +219,11 @@ while True:
                     break
                 elif option == "1":
                     coins = addBuildingToGrid(randBuild1, grid, coins)
-                    gainCoin(coins)
+                    coins = gainCoin(coins)
                 elif option == "2":
                     coins = addBuildingToGrid(randBuild2, grid, coins)
-                    gainCoin(coins)
+                    coins = gainCoin(coins)
+
                 elif option == "4":
                     saveGame()
                 else:
