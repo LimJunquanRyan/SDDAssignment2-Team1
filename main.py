@@ -117,16 +117,16 @@ def checkAdjacency(location):
     check = ['N', 'N', 'N', 'N']
     print(location[1])
     print(ord(location[0]))
-    if 1 <= int(location[1]) + 1 <= 20 and 65 <= ord(location[0]) <= 84:
+    if 1 <= int(location[1]) + 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1:
         if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in build:
             check[0] = 'Y'
-    if 1 <= int(location[1]) <= 20 and 65 <= ord(location[0]) - 1 <= 84:
+    if 1 <= int(location[1]) <= ROWS and 65 <= ord(location[0]) - 1 <= 65 + COLS - 1:
         if grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in build:
             check[1] = 'Y'
-    if 1 <= int(location[1]) - 1 <= 20 and 65 <= ord(location[0]) <= 84:
+    if 1 <= int(location[1]) - 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1:
         if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in build:
             check[2] = 'Y'
-    if 1 <= int(location[1]) <= 20 and 65 <= ord(location[0]) + 1 <= 84:
+    if 1 <= int(location[1]) <= ROWS and 65 <= ord(location[0]) + 1 <= 65 + COLS - 1:
         if grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in build:
             check[3] = 'Y'
     if check[0] == 'Y' and check[1] == 'Y' and check[2] == 'Y' and check[3] == 'Y':
@@ -137,20 +137,20 @@ def checkAdjacency(location):
 def gainCoin(coins):
     build = ['I', 'C']
     build2 = ['R']
-    for rows in range(ROWS):
-        for columns in range(COLS):
-            if grid[chr(65+rows), str(columns+1)] in build or grid[chr(65+rows), str(columns+1)] in build:
-                if 1 <= columns+1 + 1 <= 20 and 65 <= 64+rows <= 84:
+    for rows in range(1, ROWS):
+        for columns in range(1, COLS):
+            if grid[chr(65+rows), str(columns+1)] in build:
+                if 1 <= columns+1 + 1 <= COLS and 65 <= 64+rows <= 65 + ROWS - 1:
                     print(columns,rows)
                     if grid[chr(65+rows), str(columns)] in build2:
                         coins += 1
-                if 1 <= columns+1 + 1 <= 20 and 65 <= 66+rows <= 84:
+                if 1 <= columns+1 + 1 <= COLS and 65 <= 66+rows <= 65 + ROWS - 1:
                     if grid[chr(65+rows), str(columns+2)] in build2:
                         coins += 1
-                if 1 <= columns+1 + 2 <= 20 and 65 <= 64+rows <= 84:
+                if 1 <= columns+1 + 2 <= COLS and 65 <= 64+rows <= 65 + ROWS - 1:
                     if grid[chr(64+rows), str(columns+1)] in build2:
                         coins += 1
-                if 1 <= columns+1 <= 20 and 65 <= 64+rows <= 84:
+                if 1 <= columns+1 <= COLS and 65 <= 64+rows <= 65 + ROWS - 1:
                     if grid[chr(66+rows), str(columns+1)] in build2:
                         coins += 1
     return coins
