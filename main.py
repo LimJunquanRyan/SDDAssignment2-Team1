@@ -15,16 +15,15 @@ def mainMenu():
 
 
 def initGrid(rows, cols):
-    # initialize grid dictionary and coins
+    # initialize grid dictionary
     grid = {}
-    coins = 16
 
     # adds grid elements into grid dictionary with alphanumeric keys
     for i in range(rows):
         for j in range(cols):
             grid[(chr(65+j), str(i+1))] = " "
     
-    return grid, coins
+    return grid
 
 def displayTurn(turns, coins, rows, cols, grid):
     print()
@@ -225,13 +224,14 @@ def loadGame():
 
 ROWS = 20
 COLS = 20
-turns = 1
 
 buildings = {'Residential':'R', 'Industry':'I', 'Commercial':'C', 'Park':'O', 'Road':'*'}
 
-isInvalid = False
-
 while True:
+    turns = 1
+    isInvalid = False
+    coins = 2
+
     choice = mainMenu()
     #Exit Game option
     if choice == "0":
@@ -240,7 +240,7 @@ while True:
     # start new game
     elif choice in ["1", "2"]:
         if choice == "1":
-            grid, coins = initGrid(ROWS, COLS)
+            grid = initGrid(ROWS, COLS)
         else:
             grid = loadGame()
         while True:
@@ -252,7 +252,7 @@ while True:
                 if isInvalid == False:
                     randBuild1, randBuild2 = getRandomBuildChoice(buildings)
                 else:
-                    isInvalid == False
+                    isInvalid = False
 
                 displayGameMenu(turns, coins, randBuild1, randBuild2)
                 option = input()
