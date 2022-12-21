@@ -164,30 +164,119 @@ def gainCoin(build, location, coins, grid):
         left = ( chr(ord(location[0])-1), str(int(location[1])) )
         right = ( chr(ord(location[0])+1), str(int(location[1])) )
         top = ( chr(ord(location[0])), str(int(location[1])-1) )
-        bottom =( chr(ord(location[0])), str(int(location[1])+1) )
+        bottom = ( chr(ord(location[0])), str(int(location[1])+1) )
+        
+        adjacent_sqrs = [left, right, top, bottom]
 
         # check adjacent location based on if building is I, R or C
         if build[1] == 'I' or build[1] == 'C':
-            if left in grid.keys() and grid[left] == 'R':
-                coins +=1
-            if right in grid.keys() and grid[right] == 'R':
-                coins +=1
-            if top in grid.keys() and grid[top] == 'R':
-                coins +=1
-            if bottom in grid.keys() and grid[bottom] == 'R':
-                coins +=1
+            for plot in adjacent_sqrs:
+                if plot in grid.keys() and grid[plot] == 'R':
+                    coins +=1
         else:
-            if left in grid.keys() and (grid[left] == 'I' or grid[left] == 'C'):
-                coins +=1
-            if right in grid.keys() and (grid[right] == 'I' or grid[right] == 'C'):
-                coins +=1
-            if top in grid.keys() and (grid[top] == 'I' or grid[top] == 'C'):
-                coins +=1
-            if bottom in grid.keys() and (grid[bottom] == 'I' or grid[bottom] == 'C'):
-                coins +=1
+            for plot in adjacent_sqrs:
+                if plot in grid.keys() and (grid[plot] == 'I' or grid[plot] == 'C'):
+                    coins +=1
 
     return coins
+
+def scoring(grid):
+    # set score
+    score = 0
+    ind_score = 0
+
+    for plot in grid:
+        # check if plot is empty or not
+        if grid[plot] == " ":
+            continue
+        else:
+            # get each adjacent location
+            left = ( chr(ord(plot[0])-1), str(int(plot[1])) )
+            right = ( chr(ord(plot[0])+1), str(int(plot[1])) )
+            top = ( chr(ord(plot[0])), str(int(plot[1])-1) )
+            bottom = ( chr(ord(plot[0])), str(int(plot[1])+1) )
+
+            adjacent_sqrs = [left, right, top, bottom]
+
+            # residential
+            if grid[plot] == "R":
+                res_score = 1
+
+                for adj_plot in adjacent_sqrs:
+                    if adj_plot not in grid.keys():
+                        continue
+                    elif grid[adj_plot] == "I":
+                        res_score = 1
+                        break
+                    elif grid[adj_plot] == "R" or grid[adj_plot] == "C":
+                        res_score += 1
+                    elif grid[adj_plot] == "O":
+                        res_score += 2
                 
+                # print("res: ",res_score)
+                score += res_score
+            # industry
+            elif grid[plot] == "I":
+                if ind_score == 0:
+                    for ind in grid:
+                        if grid[ind] == "I":
+                            ind_score += 1
+                    
+                    # print("ind: ", ind_score*ind_score)
+                    score += (ind_score * ind_score)
+            # commercial & park
+            elif grid[plot] == "C" or grid[plot] == "O":
+                com_park_score = 1
+
+                for adj_plot in adjacent_sqrs:
+                    if adj_plot not in grid.keys():
+                        continue
+                    elif grid[adj_plot] == grid[plot]:
+                        com_park_score += 1
+                
+                # print("compark: ", com_park_score)
+                score += com_park_score
+            # road
+            elif grid[plot] == "*":
+                rd_score = 1
+
+                # checking left adjacency
+                if left in grid.keys():
+                    for i in range(1, ROWS):
+                        left_plot = (chr(ord(plot[0])-i), plot[1])
+                        if left_plot not in grid.keys() or grid[left_plot] != "*":
+                            break
+                        else:
+                            rd_score += 1
+                
+                # checking right adjacency
+                if right in grid.keys():
+                    for i in range(1, ROWS):
+                        right_plot = (chr(ord(plot[0])+i), plot[1])
+                        if right_plot not in grid.keys() or grid[right_plot] != "*":
+                            break
+                        else:
+                            rd_score += 1
+                
+                # print("rd: ", rd_score)
+                score += rd_score
+            
+    return score
+
+def displayScoring(score):
+
+    print("\nScore")
+    print("-----")
+    print(" "+str(score)+"\n")
+    print("Return? (type 0) ", end="")
+
+    option = input()
+
+    while option != "0":
+        print("Invalid option.")
+        print("Return? (type 0) ", end="")
+        option = input()
+
 def saveGame():
     file = open("saveFile.txt", "w")
     file.write(str(turns) + "\n")
@@ -230,7 +319,7 @@ buildings = {'Residential':'R', 'Industry':'I', 'Commercial':'C', 'Park':'O', 'R
 while True:
     turns = 1
     isInvalid = False
-    coins = 2
+    coins = 16
 
     choice = mainMenu()
     #Exit Game option
@@ -265,7 +354,11 @@ while True:
                 elif option == "2":
                     selectedBuilding, location, coins = addBuildingToGrid(randBuild2, grid, coins)
                     coins = gainCoin(selectedBuilding, location, coins, grid)
-
+                elif option == "3":
+                    score = scoring(grid)
+                    displayScoring(score)
+                    isInvalid = True
+                    continue
                 elif option == "4":
                     saveGame()
                 else:
@@ -273,6 +366,8 @@ while True:
                     isInvalid = True
                     continue
             else:
+                print()
+                print("Final Score: ", scoring(grid))
                 print()
                 print("Thank you for playing!")
                 print()
