@@ -117,20 +117,26 @@ def addBuildingToGrid(build, grid, coins):
 def checkAdjacency(location):
     build = ['R', 'I', 'C', 'O', '*']
     check = ['N', 'N', 'N', 'N']
-    # print(location[1])
-    # print(ord(location[0]))
     if 1 <= int(location[1]) + 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1:
         if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in build:
             check[0] = 'Y'
+    else:
+        check[0] = 'Y'
     if 1 <= int(location[1]) <= ROWS and 65 <= ord(location[0]) - 1 <= 65 + COLS - 1:
         if grid[chr(ord(location[0]) - 1), str(int(location[1]))] not in build:
             check[1] = 'Y'
+    else:
+        check[1] = 'Y'
     if 1 <= int(location[1]) - 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1:
         if grid[chr(ord(location[0])), str(int(location[1]) - 1)] not in build:
             check[2] = 'Y'
+    else:
+        check[2] = 'Y'
     if 1 <= int(location[1]) <= ROWS and 65 <= ord(location[0]) + 1 <= 65 + COLS - 1:
         if grid[chr(ord(location[0]) + 1), str(int(location[1]))] not in build:
             check[3] = 'Y'
+    else:
+        check[3] = 'Y'
     if check[0] == 'Y' and check[1] == 'Y' and check[2] == 'Y' and check[3] == 'Y':
         return False
     else:
