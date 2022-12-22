@@ -311,6 +311,20 @@ def loadGame():
     file.close()
     return grid
 
+#function that shows highscore for each specific grid size
+def showHighscores(highscoreList, row, column):
+    print("-" * 9, "HIGH SCORES", "-" * 9)
+    print("-" * 8, "FOR GRID {}X{}:".format(row, column), "-" * 8)
+    print("{:<4}{:<22}{}".format("Pos", "Player", "Score"))
+    print("{:<4}{:<22}{}".format("-" * 3, "-" * 6, "-" * 5))
+    for i in range(10):
+        try:
+            print("{:>2}. {:<25}{}".format(i + 1, highscoreList[i][0], highscoreList[i][1]))
+        except:
+            print("{:>2}. {:<25}{}".format(i + 1, "-", "--"))
+    print("-" * 31)
+    print()
+
 ROWS = 20
 COLS = 20
 
@@ -371,9 +385,53 @@ while True:
                 print()
                 print("Thank you for playing!")
                 print()
+                score = scoring(grid)
+                highscoreList = []
+                position = 1
+                #try statement to check if there is any existing highscores for the grid size
+                try:
+                    file = open("highscore{}x{}.txt".format(ROWS, COLS), "r")
+                    for line in file:
+                        line = line.strip("\n")
+                        line = line.split(",")
+                        highscoreList.append([line[0], line[1]])
+                    for item in range(len(highscoreList)):
+                        if score <= int(highscoreList[item][1]):
+                            position += 1
+                    file.close()
+                except:
+                    pass
+                #Asking for name to be entered in high score board with input validation
+                if position < 10:
+                    file = open("highscore{}x{}.txt".format(ROWS, COLS), "w")
+                    print("Congratulations! You made the high score board at position {}!".format(str(position)))
+                    name = input("Please enter your name (max 20 chars): ")
+                    while len(name) > 20:
+                        name = input("Please enter your name (max 20 chars): ")
+                    highscoreList.insert(position - 1, [name, score])
+                    print()
+                    showHighscores(highscoreList, ROWS, COLS)
+                    if len(highscoreList) > 10:
+                        highscoreList.pop()
+                    for item in range(len(highscoreList)):
+                        file.write(highscoreList[item][0] + "," + str(highscoreList[item][1]) + "\n")
+                    file.close()
                 break
-            
             turns += 1
+    elif choice == "3":
+        #try statement to check if the high score file for the specific grid size exists
+                try:
+                    file = open("highscore{}x{}.txt".format(ROWS, COLS), "r")
+                    highscoreList = []
+                    for line in file:
+                        line = line.strip("\n")
+                        line = line.split(",")
+                        highscoreList.append([line[0], line[1]])
+                    showHighscores(highscoreList, ROWS, COLS)
+                    file.close()
+                except:
+                    print("No high scores for grid size {}x{}".format(ROWS, COLS))
+                    print()
     else:
         print("Invalid Option")
         
