@@ -114,10 +114,10 @@ def addBuildingToGrid(build, grid, coins):
                 coins -= 1
                 return build, location, coins
     
-def checkAdjacency(location):
+def checkAdjacency(location): # BUG - Adjacency error, could place buildings not adjacent on outermost of grid (fixed by changing outer values slightly)
     build = ['R', 'I', 'C', 'O', '*']
     check = ['N', 'N', 'N', 'N']
-    if 1 <= int(location[1]) + 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1:
+    if 1 <= int(location[1]) + 1 <= ROWS and 65 <= ord(location[0]) <= 65 + COLS - 1: # BUG - Out Of Range (fixed by changing static value to dynamic value)
         if grid[chr(ord(location[0])), str(int(location[1]) + 1)] not in build:
             check[0] = 'Y'
     else:
@@ -163,7 +163,7 @@ def checkAdjacency(location):
 #                         coins += 1
 #     return coins
 
-def gainCoin(build, location, coins, grid):
+def gainCoin(build, location, coins, grid): # BUG - Gain Infinite Coins (fixed by changing the way coins were updated)
     if build[1] == 'R' or build[1] == 'C' or build[1] == 'I':
 
         # get each adjacent location
