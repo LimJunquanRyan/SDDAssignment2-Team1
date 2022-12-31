@@ -29,10 +29,11 @@ imgRoad = PhotoImage(file="./assets/road.png", height=24, width=24)
 
 buildings = {'Residential':imgResidential, 'Industry':imgIndustry, 'Commercial':imgCommercial, 'Park':imgPark, 'Road':imgRoad}
 
-def reset():
+def clearWidgets():
     for widget in frame.winfo_children():
         widget.destroy()
     
+def resetVars():
     # reset variables
     global turns, coins, score
     turns = 1
@@ -51,7 +52,8 @@ def initGrid(rows, cols):
     return grid
 
 def menu():
-    reset()
+    clearWidgets()
+    resetVars()
     ttk.Label(frame, text="Welcome to Ngee Ann City!", width=25).grid(column=0, row=0)
     ttk.Label(frame, text="\n").grid(column=0, row=1)
     ttk.Button(frame, command=gameturn, text="Start New Game!", width=25).grid(column=0, row=2)
@@ -77,8 +79,8 @@ def getRandomBuildChoice():
 
     return randBuild1, randBuild2
 
-def addBuilding(build, input_location, grid):
-    global coins, turns
+def gameUpdate(build, input_location, grid):
+    global coins, turns, score
     # print(building)
     location = (input_location[:1].upper(), input_location[1:])
 
@@ -86,20 +88,29 @@ def addBuilding(build, input_location, grid):
         if location not in grid:
             ttk.Label(frame, text="Location is invalid or not on the grid.", anchor="w", width=60, foreground="red").grid(column=COLS + 2, row=9)
         else:
-            # update coins, turns and score
-            coins -= 1
-            turns += 1
-            gameTurnInfo()
-
             # update grid
             grid[location] = buildings[build]
             ttk.Label(frame, image=buildings[build], relief="solid", background="white",).grid(column=ord(location[0])-64, row=int(location[1]))
+
+            # generate coins
+            coins = gainCoin(build, location, coins, grid)
+            
+            # update coins, turns and score
+            coins -= 1
+            turns += 1
+            score = scoring(grid)
+            gameTurnInfo()
 
             # remoive error msg if any
             ttk.Label(frame, text="", anchor="w", width=60).grid(column=COLS + 2, row=9)
             
             # randomize build choices
             buildChoices(grid)
+            
+            # endgame
+            if coins <= 0 or turns > ROWS * COLS:
+                turns -= 1
+                endGame(grid)
     else:
         if location not in grid:
             ttk.Label(frame, text="Location is invalid or not on the grid.", anchor="w", width=60, foreground="red").grid(column=COLS + 2, row=9)
@@ -109,20 +120,29 @@ def addBuilding(build, input_location, grid):
             if grid[location] != imgEmpty:
                 ttk.Label(frame, text="Location already has a building on it.", anchor="w", width=60, foreground="red").grid(column=COLS + 2, row=9)
             else:
-                # update coins, turns and score
-                coins -= 1
-                turns += 1
-                gameTurnInfo()
-
                 # update grid
                 grid[location] = buildings[build]
                 ttk.Label(frame, image=buildings[build], relief="solid", background="white",).grid(column=ord(location[0])-64, row=int(location[1]))
+
+                # generate coins
+                coins = gainCoin(build, location, coins, grid)
+                
+                # update coins, turns and score
+                coins -= 1
+                turns += 1
+                score = scoring(grid)
+                gameTurnInfo()
 
                 # remoive error msg if any
                 ttk.Label(frame, text="", anchor="w", width=60).grid(column=COLS + 2, row=9)
 
                 # randomize build choices
                 buildChoices(grid)
+
+                # endgame
+                if coins <= 0 or turns > ROWS * COLS:
+                    turns -= 1
+                    endGame(grid)
 
 def checkAdjacency(location, grid): # BUG - Adjacency error, could place buildings not adjacent on outermost of grid (fixed by changing outer values slightly)
     check = ['N', 'N', 'N', 'N']
@@ -151,6 +171,134 @@ def checkAdjacency(location, grid): # BUG - Adjacency error, could place buildin
     else:
         return True
 
+def gainCoin(build, location, coins, grid): # BUG - Gain Infinite Coins (fixed by changing the way coins were updated)
+    if build == 'Residential' or build == 'Commercial' or build == 'Industry':
+
+        # get each adjacent location
+        left = ( chr(ord(location[0])-1), str(int(location[1])) )
+        right = ( chr(ord(location[0])+1), str(int(location[1])) )
+        top = ( chr(ord(location[0])), str(int(location[1])-1) )
+        bottom = ( chr(ord(location[0])), str(int(location[1])+1) )
+        
+        adjacent_sqrs = [left, right, top, bottom]
+
+        # check adjacent location based on if building is I, R or C
+        if build == 'Industry' or build == 'Commercial':
+            for plot in adjacent_sqrs:
+                if plot in grid.keys() and grid[plot] == imgResidential:
+                    coins +=1
+        else:
+            for plot in adjacent_sqrs:
+                if plot in grid.keys() and (grid[plot] == imgIndustry or grid[plot] == imgCommercial):
+                    coins +=1
+
+    return coins
+
+def scoring(grid):
+    # set score
+    score = 0
+    ind_score = 0
+
+    for plot in grid:
+        # check if plot is empty or not
+        if grid[plot] == imgEmpty:
+            continue
+        else:
+            # get each adjacent location
+            left = ( chr(ord(plot[0])-1), str(int(plot[1])) )
+            right = ( chr(ord(plot[0])+1), str(int(plot[1])) )
+            top = ( chr(ord(plot[0])), str(int(plot[1])-1) )
+            bottom = ( chr(ord(plot[0])), str(int(plot[1])+1) )
+
+            adjacent_sqrs = [left, right, top, bottom]
+
+            # residential
+            if grid[plot] == imgResidential:
+                res_score = 1
+
+                for adj_plot in adjacent_sqrs:
+                    if adj_plot not in grid.keys():
+                        continue
+                    elif grid[adj_plot] == imgIndustry:
+                        res_score = 1
+                        break
+                    elif grid[adj_plot] == imgResidential or grid[adj_plot] == imgCommercial:
+                        res_score += 1
+                    elif grid[adj_plot] == imgPark:
+                        res_score += 2
+                
+                # print("res: ",res_score)
+                score += res_score
+            # industry
+            elif grid[plot] == imgIndustry:
+                if ind_score == 0:
+                    for ind in grid:
+                        if grid[ind] == imgIndustry:
+                            ind_score += 1
+                    
+                    # print("ind: ", ind_score*ind_score)
+                    score += (ind_score * ind_score)
+            # commercial & park
+            elif grid[plot] == imgCommercial or grid[plot] == imgPark:
+                com_park_score = 1
+
+                for adj_plot in adjacent_sqrs:
+                    if adj_plot not in grid.keys():
+                        continue
+                    elif grid[adj_plot] == grid[plot]:
+                        com_park_score += 1
+                
+                # print("compark: ", com_park_score)
+                score += com_park_score
+            # road
+            elif grid[plot] == imgRoad:
+                rd_score = 1
+
+                # checking left adjacency
+                if left in grid.keys():
+                    for i in range(1, ROWS):
+                        left_plot = (chr(ord(plot[0])-i), plot[1])
+                        if left_plot not in grid.keys() or grid[left_plot] != imgRoad:
+                            break
+                        else:
+                            rd_score += 1
+                
+                # checking right adjacency
+                if right in grid.keys():
+                    for i in range(1, ROWS):
+                        right_plot = (chr(ord(plot[0])+i), plot[1])
+                        if right_plot not in grid.keys() or grid[right_plot] != imgRoad:
+                            break
+                        else:
+                            rd_score += 1
+                
+                # print("rd: ", rd_score)
+                score += rd_score
+            
+    return score
+
+def endGame(grid):
+    clearWidgets()
+
+    # grid
+    for column in range(1, COLS + 1):
+        ttk.Label(frame, text=chr(64+column)).grid(column=column, row=0)
+    for row in range(1, ROWS + 1):
+        ttk.Label(frame, text=f"{row}  ", anchor="e", width=3).grid(column=0, row=row)
+        for column in range(1, COLS + 1):   
+            ttk.Label(frame, image=grid[chr(64+column),str(row)], relief="solid", background="white").grid(column=column, row=row)
+    
+    ttk.Label(frame, width=5).grid(column=COLS + 1, row=0)
+    ttk.Label(frame, text="Ngee Ann City Builder", anchor="w", width=60).grid(column=COLS + 2, row=0)
+
+    # game info like turns, coins and score
+    gameTurnInfo()
+
+    ttk.Label(frame, text="End of game", width=60, anchor="center").grid(column=COLS + 2, row=9)
+    ttk.Label(frame, text="Thank you for playing!", width=60, anchor="center").grid(column=COLS + 2, row=10)
+
+    ttk.Button(frame, command=menu, text="Exit to Main Menu", width=60).grid(column=COLS + 2, row=20)
+
 def gameTurnInfo():
     ttk.Label(frame, text=f"Turns: {turns}", anchor="w", width=60).grid(column=COLS + 2, row=1)
     ttk.Label(frame, text=f"Coins: {coins}", anchor="w", width=60).grid(column=COLS + 2, row=2)
@@ -169,12 +317,13 @@ def buildChoices(grid, randBuild1=None, randBuild2=None):
 
     location = StringVar()
     ttk.Entry(frame, textvariable=location, width=60).grid(column=COLS + 2, row=7)
-    ttk.Button(frame, command=lambda: addBuilding(select.get(),location.get(),grid), text="Place!", width=60).grid(column=COLS + 2, row=8)
+    ttk.Button(frame, command=lambda: gameUpdate(select.get(),location.get(),grid), text="Place!", width=60).grid(column=COLS + 2, row=8)
 
     return select
 
 def gameturn():
-    reset()
+    clearWidgets()
+    resetVars()
     game_grid = initGrid(ROWS, COLS)
     for column in range(1, COLS + 1):
         ttk.Label(frame, text=chr(64+column)).grid(column=column, row=0)
