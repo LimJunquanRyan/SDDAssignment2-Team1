@@ -60,7 +60,7 @@ def menu():
     ttk.Label(frame, text="\n").grid(column=0, row=3)
     ttk.Button(frame, command="", text="Load Saved Game! (WIP)", width=25).grid(column=0, row=4)
     ttk.Label(frame, text="\n").grid(column=0, row=5)
-    ttk.Button(frame, command="", text="Highscore Board! (WIP)", width=25).grid(column=0, row=6)
+    ttk.Button(frame, command=highscoreBoard, text="Highscore Board!", width=25).grid(column=0, row=6)
 
 def selected(building):
     selection = f"You have selected {building}. Please enter a valid location below."
@@ -104,7 +104,7 @@ def gameUpdate(build, input_location, grid):
             # remoive error msg if any
             ttk.Label(frame, text="", anchor="w", width=60).grid(column=COLS + 2, row=9)
             
-            # randomize build choices
+            # randomize build choicesscore
             buildChoices(grid)
             
             # endgame
@@ -294,8 +294,11 @@ def endGame(grid):
     # game info like turns, coins and score
     gameTurnInfo()
 
-    ttk.Label(frame, text="End of game", width=60, anchor="center").grid(column=COLS + 2, row=9)
-    ttk.Label(frame, text="Thank you for playing!", width=60, anchor="center").grid(column=COLS + 2, row=10)
+    ttk.Label(frame, text="End of game", width=60, anchor="center").grid(column=COLS + 2, row=8)
+    ttk.Label(frame, text="Thank you for playing!", width=60, anchor="center").grid(column=COLS + 2, row=9)
+
+    #Highscore entry
+    highscoreCheck()
 
     ttk.Button(frame, command=menu, text="Exit to Main Menu", width=60).grid(column=COLS + 2, row=20)
 
@@ -343,6 +346,80 @@ def gameturn():
     
     ttk.Button(frame, command="", text="Save Game (WIP)", width=60).grid(column=COLS + 2, row=19)
     ttk.Button(frame, command=menu, text="Exit to Main Menu", width=60).grid(column=COLS + 2, row=20)
+
+def highscoreCheck():
+    highscoreList = []
+    position = 1
+    #try statement to check if there is any existing highscores for the grid size
+    try:
+        file = open("highscore{}x{}.txt".format(ROWS, COLS), "r")
+        for line in file:
+            line = line.strip("\n")
+            line = line.split(",")
+            highscoreList.append([line[0], line[1]])
+        for item in range(len(highscoreList)):
+            if score <= int(highscoreList[item][1]):
+                position += 1
+        file.close()
+    except:
+        pass
+    highscoreEntry(highscoreList, position)
+
+def highscoreEntry(highscoreList, position):
+    #Asking for name to be entered in high score board with input validation
+    if position < 10:
+        file = open("highscore{}x{}.txt".format(ROWS, COLS), "w")
+        ttk.Label(frame, text=f"Congratulations! You made the high score board at position {position}!", width=60, anchor="center").grid(column=COLS + 2, row=10)
+        ttk.Label(frame, text="Please enter your name: ", width=60, anchor="center").grid(column=COLS + 2, row=11)
+        name = StringVar()
+        ttk.Entry(frame, textvariable=name, width=60).grid(column=COLS + 2, row=12)
+        ttk.Button(frame, text="Submit Name!", command=lambda: highscoreInsert(highscoreList, position, file, name.get())).grid(column=COLS + 2, row=13)
+        
+def highscoreInsert(highscoreList, position, file, name):
+    highscoreList.insert(position - 1, [name, score])
+    showHighscores(highscoreList, ROWS, COLS)
+    if len(highscoreList) > 10:
+        highscoreList.pop()
+    for item in range(len(highscoreList)):
+        file.write(highscoreList[item][0] + "," + str(highscoreList[item][1]) + "\n")
+    file.close()
+
+#function that shows highscore for each specific grid size
+def showHighscores(highscoreList, row, column):
+    clearWidgets()
+    ttk.Label(frame, text="HIGH SCORES", width=15, anchor="center").grid(column=1, row=0)
+    ttk.Label(frame, text=f"FOR GRID {row}x{column}:", width=25, anchor="center").grid(column=1, row=1)
+    ttk.Label(frame, text="\n").grid(column=1, row=2)
+    ttk.Label(frame, text="Position", width=15, anchor="w").grid(column=0, row=3)
+    ttk.Label(frame, text="Player", width=15, anchor="center").grid(column=1, row=3)
+    ttk.Label(frame, text="Score", width=15, anchor="e").grid(column=2, row=3)
+    ttk.Label(frame, text="\n").grid(column=1, row=4)
+    for i in range(10):
+        try:
+            ttk.Label(frame, text=f"{i + 1}", width=15, anchor="w").grid(column=0, row=i + 5)
+            ttk.Label(frame, text=f"{highscoreList[i][0]}", width=15, anchor="center").grid(column=1, row=i + 5)
+            ttk.Label(frame, text=f"{highscoreList[i][1]}", width=15, anchor="e").grid(column=2, row=i + 5)
+        except:
+            ttk.Label(frame, text=f"{i + 1}", width=15, anchor="w").grid(column=0, row=i + 5)
+            ttk.Label(frame, text="-", width=15, anchor="center").grid(column=1, row=i + 5)
+            ttk.Label(frame, text="-", width=15, anchor="e").grid(column=2, row=i + 5)
+    ttk.Label(frame, text="\n").grid(column=1, row=19)
+    ttk.Button(frame, text="Return to Main Menu", width=20, command=menu).grid(column=1, row=20)
+
+def highscoreBoard():
+    #try statement to check if the high score file for the specific grid size exists
+    try:
+        file = open("highscore{}x{}.txt".format(ROWS, COLS), "r")
+        highscoreList = []
+        for line in file:
+            line = line.strip("\n")
+            line = line.split(",")
+            highscoreList.append([line[0], line[1]])
+        file.close()
+        showHighscores(highscoreList, ROWS, COLS)
+    except:
+        print("No high scores for grid size {}x{}".format(ROWS, COLS))
+        print()
 
 menu()
 mainloop()
