@@ -9,6 +9,9 @@ turns = 1
 coins = 16
 score = 0
 
+randbuild1Save = None
+randbuild2Save = None
+
 parent = Tk()
 width= parent.winfo_screenwidth()               
 height= parent.winfo_screenheight()               
@@ -51,6 +54,117 @@ def initGrid(rows, cols):
     
     return grid
 
+def saveGame(grid, randBuild1, randBuild2):
+    # saves turns, coins, score random buildings
+    file = open("saveFile.txt", "w")
+    file.write(str(turns) + "\n")
+    file.write(str(coins) + "\n")
+    file.write(str(score) + "\n")
+    rbuilding1 = 0
+    rbuilding2 = 0
+    if randBuild1 == list(buildings.items())[0]:
+        rbuilding1 = 1
+    elif randBuild1 == list(buildings.items())[1]:
+        rbuilding1 = 2
+    elif randBuild1 == list(buildings.items())[2]:
+        rbuilding1 = 3
+    elif randBuild1 == list(buildings.items())[3]:
+        rbuilding1 = 4
+    elif randBuild1 == list(buildings.items())[4]:
+        rbuilding1 = 5
+
+    if randBuild2 == list(buildings.items())[0]:
+        rbuilding2 = 1
+    elif randBuild2 == list(buildings.items())[1]:
+        rbuilding2 = 2
+    elif randBuild2 == list(buildings.items())[2]:
+        rbuilding2 = 3
+    elif randBuild2 == list(buildings.items())[3]:
+        rbuilding2 = 4
+    elif randBuild2 == list(buildings.items())[4]:
+        rbuilding2 = 5
+    file.write(str(rbuilding1) + "\n")
+    file.write(str(rbuilding2) + "\n")
+    building = ""
+    # saving grid
+    for rows in range(ROWS):
+        rowSave = ""
+        for columns in range(COLS):
+            if grid[chr(65+rows), str(columns+1)] == imgResidential:
+                building = 1
+            elif grid[chr(65+rows), str(columns+1)] == imgIndustry:
+                building = 2
+            elif grid[chr(65+rows), str(columns+1)] == imgCommercial:
+                building = 3
+            elif grid[chr(65+rows), str(columns+1)] == imgPark:
+                building = 4
+            elif grid[chr(65+rows), str(columns+1)] == imgRoad:
+                building = 5
+
+            rowSave = rowSave + str(building) + ","
+            building = ""
+        file.write(rowSave + "\n")
+
+    # Close file
+    file.close()
+    # print("Game saved!")
+
+def loadGame():
+    global turns, coins, score, randbuild1Save, randbuild2Save
+    file = open("saveFile.txt", "r")
+    turns = int(file.readline())
+    coins = int(file.readline())
+    score = int(file.readline())
+    rand1 = int(file.readline())
+    rand2 = int(file.readline())
+
+    if rand1 == 1:
+        randbuild1Save = list(buildings.items())[0]
+    elif rand1 == 2:
+        randbuild1Save = list(buildings.items())[1]
+    elif rand1 == 3:
+        randbuild1Save = list(buildings.items())[2]
+    elif rand1 == 4:
+        randbuild1Save = list(buildings.items())[3]
+    elif rand1 == 5:
+        randbuild1Save = list(buildings.items())[4]
+
+    if rand2 == 1:
+        randbuild2Save = list(buildings.items())[0]
+    elif rand2 == 2:
+        randbuild2Save = list(buildings.items())[1]
+    elif rand2 == 3:
+        randbuild2Save = list(buildings.items())[2]
+    elif rand2 == 4:
+        randbuild2Save = list(buildings.items())[3]
+    elif rand2 == 5:
+        randbuild2Save = list(buildings.items())[4]    
+    rows = 0
+    grid = {}
+    building = imgEmpty
+    for line in file:
+        line = line.strip("\n")
+        buildingRow = line.split(",")
+        for columns in range(20):
+            # checking building type
+            if buildingRow[columns] == "1":
+                building = imgResidential
+            elif buildingRow[columns] == "2":
+                building = imgIndustry
+            elif buildingRow[columns] == "3":
+                building = imgCommercial
+            elif buildingRow[columns] == "4":
+                building = imgPark
+            elif buildingRow[columns] == "5":
+                building = imgRoad
+            else:
+                building = imgEmpty
+            grid[chr(65+rows), str(columns+1)] = building
+        rows += 1
+        building = imgEmpty
+    file.close()
+    gameturn(grid)
+
 def menu():
     clearWidgets()
     resetVars()
@@ -58,7 +172,7 @@ def menu():
     ttk.Label(frame, text="\n").grid(column=0, row=1)
     ttk.Button(frame, command=gameturn, text="Start New Game!", width=25).grid(column=0, row=2)
     ttk.Label(frame, text="\n").grid(column=0, row=3)
-    ttk.Button(frame, command="", text="Load Saved Game! (WIP)", width=25).grid(column=0, row=4)
+    ttk.Button(frame, command=loadGame, text="Load Saved Game!", width=25).grid(column=0, row=4)
     ttk.Label(frame, text="\n").grid(column=0, row=5)
     ttk.Button(frame, command="", text="Highscore Board! (WIP)", width=25).grid(column=0, row=6)
 
@@ -305,6 +419,7 @@ def gameTurnInfo():
     ttk.Label(frame, text=f"Score: {score}", anchor="w", width=60).grid(column=COLS + 2, row=3)
 
 def buildChoices(grid, randBuild1=None, randBuild2=None):
+    global randbuild1Save, randbuild2Save
     select = StringVar()
 
     # for saved files
@@ -315,16 +430,19 @@ def buildChoices(grid, randBuild1=None, randBuild2=None):
     ttk.Radiobutton(frame, command=lambda: selected(select.get()), text=f"Build a {randBuild2[0]}", variable = select, value=randBuild2[0], width=57).grid(column=COLS + 2, row=5)
     ttk.Label(frame, text="Select a building", anchor="w", width=60).grid(column=COLS + 2, row=6)
 
-    location = StringVar()
+    location = StringVar() 
     ttk.Entry(frame, textvariable=location, width=60).grid(column=COLS + 2, row=7)
     ttk.Button(frame, command=lambda: gameUpdate(select.get(),location.get(),grid), text="Place!", width=60).grid(column=COLS + 2, row=8)
+    randbuild1Save = randBuild1
+    randbuild2Save = randBuild2
+    return select, randBuild1, randBuild2
 
-    return select
-
-def gameturn():
+def gameturn(game_grid = None, randBuild1 = None, randBuild2 = None):
     clearWidgets()
-    resetVars()
-    game_grid = initGrid(ROWS, COLS)
+    randcon = False
+    if game_grid is None:
+        resetVars()
+        game_grid = initGrid(ROWS, COLS)
     for column in range(1, COLS + 1):
         ttk.Label(frame, text=chr(64+column)).grid(column=column, row=0)
     for row in range(1, ROWS + 1):
@@ -339,9 +457,13 @@ def gameturn():
     gameTurnInfo()
 
     # building choices
+    # not using gridSave, but randSave1 and 2 is for saving the random buildings for saveGame function
+
     buildChoices(game_grid)
+
     
-    ttk.Button(frame, command="", text="Save Game (WIP)", width=60).grid(column=COLS + 2, row=19)
+    # Save game Button
+    ttk.Button(frame, command=lambda: saveGame(game_grid, randbuild1Save, randbuild2Save), text="Save Game", width=60).grid(column=COLS + 2, row=19)
     ttk.Button(frame, command=menu, text="Exit to Main Menu", width=60).grid(column=COLS + 2, row=20)
 
 menu()
